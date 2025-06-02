@@ -5,6 +5,10 @@ ________________________________________
 ### Objective Setting  
 금융기관은 대출을 승인하기 전에 고객이 상환 의무를 신뢰성 있게 이행할 수 있는지, 즉 채무불이행 위험이 있는지 평가합니다. 이 프로젝트의 목표는 외부 재무 데이터뿐만 아니라 다양한 고객 정보(소득, 대출 금액, 연령, 고용 기간 등)를 활용하여 대출 불이행 위험을 예측하는 견고한 분류 모델을 개발하는 것입니다. 또한 신용 위험이 높은 고객을 그룹화하는 클러스터링 모델을 통해 고객의 신용등급을 알 수 있게 합니다.
 ________________________________________
+### Architecture  
+![image](https://github.com/user-attachments/assets/a5f2871f-114a-4187-b797-0f4e01fe5c99)
+![image](https://github.com/user-attachments/assets/f296fa5d-b49f-4a21-ad99-44397beed195)  
+________________________________________
 ## Data Inspection  
 ### application_train.csv - 고객 정보 기반으로 대출 연체 여부(TARGET) 예측  
 - 데이터 개요:  
@@ -16,30 +20,30 @@ ________________________________________
  \- object:    16  
 
 #### Distribution of TARGET Variable  
-![image](https://github.com/user-attachments/assets/b7ff1500-5eb2-480c-a981-c3cb92cea665)
+![image](https://github.com/user-attachments/assets/b7ff1500-5eb2-480c-a981-c3cb92cea665)  
 TARGET=0이 대다수이며, TARGET=1은 약 8% 수준으로 연체자의 수가 매우 적다.  
 이는 심각한 클래스 불균형 문제로, 향후 모델 학습 시 Stratify나 Undersampling을 고려해야함.  
 
 #### Distribution of Loan Amount (AMT_CREDIT)  
-![image](https://github.com/user-attachments/assets/b41758dc-898c-4683-8f37-065f7e493e56)
+![image](https://github.com/user-attachments/assets/b41758dc-898c-4683-8f37-065f7e493e56)  
 대부분의 대출 금액이 30만 ~ 1000만 단위에 몰려 있음.  
 positive skewed 있음 → 로그 변환 등 정규화 필요해보임.  
 
 #### Distribution of Contract Type  
-![image](https://github.com/user-attachments/assets/0c5bcd7a-bcd4-465b-8f41-2b77727cdbff)
+![image](https://github.com/user-attachments/assets/0c5bcd7a-bcd4-465b-8f41-2b77727cdbff)  
 Cash loans가 대부분을 차지하며, Revolving loans는 비교적 적음.  
 계약 유형별로 연체율이 다를 수 있어 중요한 범주형 변수로 작용 가능.  
 
 #### Loan Amount by Income Type and Loan Repayment Status  
-![image](https://github.com/user-attachments/assets/25acba2c-64f8-4b76-a150-db2216649e5a)
+![image](https://github.com/user-attachments/assets/25acba2c-64f8-4b76-a150-db2216649e5a)  
 
 #### Correlation with TARGET - Top 10 Features  
-![image](https://github.com/user-attachments/assets/4d656aa0-d65c-4101-98cb-6c6f9a3d9ec9)
+![image](https://github.com/user-attachments/assets/4d656aa0-d65c-4101-98cb-6c6f9a3d9ec9)  
 EXT_SOURCE_1, EXT_SOURCE_2, EXT_SOURCE_3와 TARGET 사이에 가장 강한 음의 상관관계 확인됨.  
 이 변수들은 외부 신용 점수이며, 높을수록 연체 가능성이 낮음.  
 
 #### Loan Default Rate by Age Group  
-![image](https://github.com/user-attachments/assets/8523e223-03ec-43ea-a4f0-3648b456db1e)
+![image](https://github.com/user-attachments/assets/8523e223-03ec-43ea-a4f0-3648b456db1e)  
 젊은 층(20~30대)의 연체율이 상대적으로 높고, 고령층일수록 연체율이 낮음.  
 고령층일수록 안정된 금융 상태  
 
@@ -53,25 +57,25 @@ EXT_SOURCE_1, EXT_SOURCE_2, EXT_SOURCE_3와 TARGET 사이에 가장 강한 음�
  \- object:    3  
 
 #### Distribution of Credit Active Status  
-![image](https://github.com/user-attachments/assets/65cb4580-b9cc-4d3b-a6b4-1b25f223a20f)
+![image](https://github.com/user-attachments/assets/65cb4580-b9cc-4d3b-a6b4-1b25f223a20f)   
 Closed가 압도적으로 많고, 그 다음이 Active 상태  
 이는 대부분의 대출 계좌가 이미 종료되었고, 일부만 현재 활동 중이라는 것을 보임  
 Bad debt와 Sold는 상대적으로 매우 드물게 나타나며, 분석 시 다르게 취급하거나 그룹화가 필요  
 
 #### Distribution of Credit Type  
-![image](https://github.com/user-attachments/assets/28d66857-171d-4b2d-9062-fffa3d279ed2)
+![image](https://github.com/user-attachments/assets/28d66857-171d-4b2d-9062-fffa3d279ed2)  
 가장 많은 대출 유형은 Consumer credit, 그 다음은 Credit card입니다.  
 Mortgage, Car loan 등은 일부 존재하지만 편중 현상이 크기 때문에 향후 분석 시 상위 몇 개만 유지하거나 범주 통합이 필요  
 나머지 희귀 대출 유형들은 카테고리 수 감소 또는 기타로 통합하는 방식으로 처리 가능성 고려.  
 
 #### Distribution of DAYS_CREDIT  
-![image](https://github.com/user-attachments/assets/9a6cc506-23a5-4dd7-8103-e5500b1e5381)
+![image](https://github.com/user-attachments/assets/9a6cc506-23a5-4dd7-8103-e5500b1e5381)  
 값이 0에 가까울수록 최근 조회된 계좌, 음의 값일수록 오래된 계좌를 의미.  
 대부분의 계좌는 최근 몇 년 이내에 조회되었으며, 멀리 과거로 갈수록 빈도가 줌  
 이는 최신 신용 정보에 대한 가중치를 줄 때 유용하게 사용 가능.  
 
 #### Correlation Heatmap of Selected Numerical Features  
-![image](https://github.com/user-attachments/assets/9aeec750-d4d2-4dde-8510-023db5b25014)
+![image](https://github.com/user-attachments/assets/9aeec750-d4d2-4dde-8510-023db5b25014)  
 AMT_CREDIT_SUM ↔ AMT_CREDIT_SUM_DEBT 간의 상관계수가 0.68로 가장 높음 → 이는 전체 대출 잔액이 부채 잔액과 밀접히 연관되어 있음을 의미.  
 DAYS_CREDIT ↔ DAYS_CREDIT_UPDATE 간에도 높은 양의 상관관계 (0.69) → 조회 시점과 업데이트 시점 간 간격이 적은 경우가 많음.  
 나머지 변수들은 대부분 상관관계가 낮음.  
@@ -86,34 +90,34 @@ DAYS_CREDIT ↔ DAYS_CREDIT_UPDATE 간에도 높은 양의 상관관계 (0.69) �
  \- object:    6  
 
 #### Distribution of Previous Application Status  
-![image](https://github.com/user-attachments/assets/6e4286d1-11f2-4961-8dab-14a4a97a30d2)
+![image](https://github.com/user-attachments/assets/6e4286d1-11f2-4961-8dab-14a4a97a30d2)  
 대부분의 과거 신청은 Approved 상태로 처리  
 Canceled와 Refused 꽤 있음.  
 고객이 이전에 승인된 대출 경험이 있는지, 반복적으로 거절되었는지에 따라 신용 리스크를 예측 가능  
 
 #### Distribution of Previous Contract Type  
-![image](https://github.com/user-attachments/assets/d0634a40-53a4-496d-b92a-ad74bf847fb6)
+![image](https://github.com/user-attachments/assets/d0634a40-53a4-496d-b92a-ad74bf847fb6)  
 주로 Cash loans와 Consumer loans가 많고, Revolving loans도 일부 존재  
 고객이 어떤 유형의 대출을 선호했는지 파악할 수 있으며, 이후 대출 유형 추천에 반영 가능  
 
 #### Mean Application vs Credit Amount by Contract Type  
-![image](https://github.com/user-attachments/assets/6e94cc90-704a-4916-ae42-4e14d11df9fc)
+![image](https://github.com/user-attachments/assets/6e94cc90-704a-4916-ae42-4e14d11df9fc)  
 모든 계약 유형에서 승인된 금액(AMT_CREDIT)이 신청 금액(AMT_APPLICATION)보다 대부분 크거나 비슷함.  
 특히 Revolving loans에서는 평균 승인 금액이 신청 금액보다 높음  
 
 #### Application Status by Loan Type  
-![image](https://github.com/user-attachments/assets/bc24b6aa-92df-4a7b-86ca-e2b06bdf891b)
+![image](https://github.com/user-attachments/assets/bc24b6aa-92df-4a7b-86ca-e2b06bdf891b)  
 Consumer loans는 승인률이 높고 거절 및 취소도 일부 있음.  
 Cash loans는 승인 외에도 취소율이 꽤 높음.  
 Revolving loans는 승인, 거절, 취소가 균형 있게 분포됨.  
 대출 상품별로 승인률 차이가 존재하므로 신용 점수 모델에 loan type을 반영할 수 있음.  
 
 #### Distribution of Days Since Previous Application  
-![image](https://github.com/user-attachments/assets/dbdebb14-32f4-47f9-b44b-bda541d1aba5)
+![image](https://github.com/user-attachments/assets/dbdebb14-32f4-47f9-b44b-bda541d1aba5)  
 최근 신청이 많고, 시간이 오래된 과거 신청은 점차 줌.  
 
 #### Correlation Heatmap of Numerical Features  
-![image](https://github.com/user-attachments/assets/83480f51-29bc-4478-b821-54bd158a060b)
+![image](https://github.com/user-attachments/assets/83480f51-29bc-4478-b821-54bd158a060b)  
 AMT_APPLICATION, AMT_CREDIT, AMT_GOODS_PRICE는 서로 강한 양의 상관관계  
 DAYS_LAST_DUE와 DAYS_TERMINATION도 0.93의 높은 상관관계를 보임.  
 
@@ -338,12 +342,18 @@ ________________________________________
 \- 상위 5개 조합에 대한 클러스터링 과정을 자세히 보여주는 콘솔 출력.  
 \- 각 상위 조합에 대해 model_visualizations/ 아래의 하위 디렉토리에 다음이 포함됩니다:  
 - _Elbow_Method.png: WCSS 대 군집 수 그래프.  
-- _KMeans_Clusters.csv: SK_ID_CURR, Cluster_Label, Risk_Group 및 XGBoost Classifier 확률을 포함하는 CSV.  
+![image](https://github.com/user-attachments/assets/7fedea74-10c4-42ce-aea4-4aecab38ea89)  
+- _KMeans_Clusters.csv: SK_ID_CURR, Cluster_Label, Risk_Group 및 XGBoost Classifier 확률을 포함하는 CSV.
 - _XGB_Reg_Test_Pred_Dist.png: XGBoost Regressor 예측의 히스토그램.  
+![image](https://github.com/user-attachments/assets/d47dedb5-a79d-4cbc-a7ff-902c6cdd646b)  
 - _XGB_Reg_Pred_per_RiskGroup.png: 위험 그룹별 XGBoost Regressor 예측의 상자 그림.  
+![image](https://github.com/user-attachments/assets/2b885744-d340-45f3-8361-961034afc1da)  
 - _Cluster_Sizes.png: 위험 그룹별 고객 수의 막대 그래프.  
-- _Prob_Dist_per_RiskGroup.png: 위험 그룹별 XGBoost Classifier 확률의 상자 그림.  
+![image](https://github.com/user-attachments/assets/8b937b59-cce2-4b2f-be8f-d83b4ce373db)  
+- _Prob_Dist_per_RiskGroup.png: 위험 그룹별 XGBoost Classifier 확률의 상자 그림.
+![image](https://github.com/user-attachments/assets/13643432-b3ad-42bd-a2cf-0e6360d2f7ef)  
 - _PCA_Clusters_RiskGroup.png: 위험 그룹별로 색상이 지정된 클러스터의 2D PCA 산점도.  
+![image](https://github.com/user-attachments/assets/a9f4f920-001e-4e19-bf31-dcb79508a2ed)  
 
 #### #각 폴드마다 classifier AUC F1 점수
  ![image](https://github.com/user-attachments/assets/f282d064-bf22-46a1-a6ff-71ccc7187de2)
