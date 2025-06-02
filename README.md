@@ -8,7 +8,7 @@ ________________________________________
 ## Data Inspection  
 ### application_train.csv - 고객 정보 기반으로 대출 연체 여부(TARGET) 예측  
 - 데이터 개요:  
- \- 행(Row) 수: 122
+ \- 행(Row) 수: 122  
  \- 열(Column) 수: 307511  
 - Column 데이터 타입별 개수:  
  \- float64:   65  
@@ -81,7 +81,7 @@ DAYS_CREDIT ↔ DAYS_CREDIT_UPDATE 간에도 높은 양의 상관관계 (0.69) �
  \- 행(Row) 수: 37  
  \- 열(Column) 수: 1670214  
 - Column 데이터 타입별 개수:  
- \- float64:   16
+ \- float64:   16  
  \- int64:     15  
  \- object:    6  
 
