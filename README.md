@@ -402,11 +402,11 @@ Hyperparameter 튜닝 결과 :
  ![image](https://github.com/user-attachments/assets/cecda7da-ac83-433e-adc7-f93273d3f458)
 
 ## Conclusion  
-\- Home Credit data는 매우 imbalanced(target이 0에 치중되어있음)한 데이터이므로 k-fold나 모델링을 진행할 때 stratify를 꼭 적용하도록 함.  
-\- 정보량 추가를 위해 Test가 존재하지 않는 서브 테이블을 train파일에 Merge해서 Test를 진행하려 했을 때, Test에도 똑같은 서브 테이블을 Merge해야하고, train과 test가 똑같은 전처리 과정을 거쳐야 한다는 것을 알게됨.  
-\- 만약 두 train과 test에 대해 같은 서브 테이블을 merge하고 같은 전처리 과정을 거쳤을 때, 모델이 미래의 데이터(test 데이터)를 학습하게 되는 ‘데이터 누출’ 현상이 일어나기 때문에 merge를 하지 않는 것이 더 적합하다고 판단함.  
-\- OneHot + Robust 조합이 전체 조합 중 AUC 기준으로 가장 우수한 성능을 보임.  
-\- 같은 데이터에서 XGBClassifier와 XGBRegressor의 결과를 비교함으로써 회귀 기반 접근도 이진 분류 문제에 효과적으로 사용 가능함. "LGBMRegressor는 0.5 임계값 기준 AUC가 XGBClassifier보다 높았다. 이는 확률적 접근이 유의미함을 시사함.  
-\- 학습할 때 각 분류 모델에 대해 RandomizedSearchCV를 수행했을 때, AUC가 LightGBM이 더 높았음. 최종 분류기로 LightGBM 채택.  
+- Home Credit data는 매우 imbalanced(target이 0에 치중되어있음)한 데이터이므로 k-fold나 모델링을 진행할 때 stratify를 꼭 적용하도록 함.  
+- 정보량 추가를 위해 Test가 존재하지 않는 서브 테이블을 train파일에 Merge해서 Test를 진행하려 했을 때, Test에도 똑같은 서브 테이블을 Merge해야하고, train과 test가 똑같은 전처리 과정을 거쳐야 한다는 것을 알게됨.  
+- 만약 두 train과 test에 대해 같은 서브 테이블을 merge하고 같은 전처리 과정을 거쳤을 때, 모델이 미래의 데이터(test 데이터)를 학습하게 되는 ‘데이터 누출’ 현상이 일어나기 때문에 merge를 하지 않는 것이 더 적합하다고 판단함.  
+- OneHot + Robust 조합이 전체 조합 중 AUC 기준으로 가장 우수한 성능을 보임.  
+- 같은 데이터에서 XGBClassifier와 XGBRegressor의 결과를 비교함으로써 회귀 기반 접근도 이진 분류 문제에 효과적으로 사용 가능함. "LGBMRegressor는 0.5 임계값 기준 AUC가 XGBClassifier보다 높았다. 이는 확률적 접근이 유의미함을 시사함.  
+- 학습할 때 각 분류 모델에 대해 RandomizedSearchCV를 수행했을 때, AUC가 LightGBM이 더 높았음. 최종 분류기로 LightGBM 채택.  
 
 
