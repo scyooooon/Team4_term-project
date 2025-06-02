@@ -1,285 +1,91 @@
 # Team4_term-project
-Team4_Writeup
+Team4_Writeup  
 Home Credit Default Risk | Kaggle
 ________________________________________
-Objective Setting 
+### Objective Setting  
 금융기관은 대출을 승인하기 전에 고객이 상환 의무를 신뢰성 있게 이행할 수 있는지, 즉 채무불이행 위험이 있는지 평가합니다. 이 프로젝트의 목표는 외부 재무 데이터뿐만 아니라 다양한 고객 정보(소득, 대출 금액, 연령, 고용 기간 등)를 활용하여 대출 불이행 위험을 예측하는 견고한 분류 모델을 개발하는 것입니다. 또한 신용 위험이 높은 고객을 그룹화하는 클러스터링 모델을 통해 고객의 신용등급을 알 수 있게 합니다.
 ________________________________________
-Data Inspection
-application_train.csv - 고객 정보 기반으로 대출 연체 여부(TARGET) 예측
-데이터 개요:
+## Data Inspection  
+### application_train.csv - 고객 정보 기반으로 대출 연체 여부(TARGET) 예측  
+데이터 개요:  
 - 행(Row) 수: 122
-- 열(Column) 수: 307511
-Column 데이터 타입별 개수:
-float64:   65
-int64:     41
-object:    16
-수치형 변수 통계 요약:
+- 열(Column) 수: 307511  
+Column 데이터 타입별 개수:  
+float64:   65  
+int64:     41  
+object:    16  
 
-변수	count	mean	std	min
-SK_ID_CURR	307511.0	278180.518577	102790.175348	100002.0
-TARGET	307511.0	0.080729	0.272419	0.0
-CNT_CHILDREN	307511.0	0.417052	0.722121	0.0
-AMT_INCOME_TOTAL	307511.0	168797.919297	237123.146279	25650.0
-AMT_CREDIT	307511.0	599025.999706	402490.776996	45000.0
-…	…	…	…	…
-AMT_REQ_CREDIT_BUREAU_DAY	265992.0	0.007000	0.110757	0.0
-AMT_REQ_CREDIT_BUREAU_WEEK	265992.0	0.034362	0.204685	0.0
-AMT_REQ_CREDIT_BUREAU_MON	265992.0	0.267395	0.916002	0.0
-AMT_REQ_CREDIT_BUREAU_QRT	265992.0	0.265474	0.794056	0.0
-AMT_REQ_CREDIT_BUREAU_YEAR	265992.0	1.899974	1.869295	0.0
+#### Distribution of TARGET Variable  
+![image](https://github.com/user-attachments/assets/b7ff1500-5eb2-480c-a981-c3cb92cea665)
+TARGET=0이 대다수이며, TARGET=1은 약 8% 수준으로 연체자의 수가 매우 적다.  
+이는 심각한 클래스 불균형 문제로, 향후 모델 학습 시 Stratify나 Undersampling을 고려해야함.  
 
-변수	25%	50%	75%	최대값
-SK_ID_CURR	189145.5	278202	367142.5	456255
-TARGET	0	0	0	1
-CNT_CHILDREN	0	0	1	19
-AMT_INCOME_TOTAL	112500	147150	202500	117000000
-AMT_CREDIT	270000	513531	808650	4050000
-AMT_REQ_CREDIT_BUREAU_DAY	0	0	0	9
-…	…	…	…	…
-AMT_REQ_CREDIT_BUREAU_WEEK	0	0	0	8
-AMT_REQ_CREDIT_BUREAU_MON	0	0	0	27
-AMT_REQ_CREDIT_BUREAU_QRT	0	0	0	261
-AMT_REQ_CREDIT_BUREAU_YEAR	0	1	3	25
+#### Distribution of Loan Amount (AMT_CREDIT)  
+![image](https://github.com/user-attachments/assets/b41758dc-898c-4683-8f37-065f7e493e56)
+대부분의 대출 금액이 30만 ~ 1000만 단위에 몰려 있음.  
+positive skewed 있음 → 로그 변환 등 정규화 필요해보임.  
 
-범주형 변수 통계 요약:
-변수	고유값 수	최빈값
-NAME_CONTRACT_TYPE	2	Cash loans
-CODE_GENDER	3	F
-FLAG_OWN_CAR	2	N
-FLAG_OWN_REALTY	2	Y
-NAME_TYPE_SUITE	7	Unaccompanied
-NAME_INCOME_TYPE	8	Working
-NAME_EDUCATION_TYPE	5	Secondary / secondary special
-NAME_FAMILY_STATUS	6	Married
-NAME_HOUSING_TYPE	6	House / apartment
-OCCUPATION_TYPE	18	Laborers
-WEEKDAY_APPR_PROCESS_START	7	TUESDAY
-ORGANIZATION_TYPE	58	Business Entity Type 3
-FONDKAPREMONT_MODE	4	reg oper account
-HOUSETYPE_MODE	3	block of flats
-WALLSMATERIAL_MODE	7	Panel
-EMERGENCYSTATE_MODE	2	No
+#### Distribution of Contract Type  
+![image](https://github.com/user-attachments/assets/0c5bcd7a-bcd4-465b-8f41-2b77727cdbff)
+Cash loans가 대부분을 차지하며, Revolving loans는 비교적 적음.  
+계약 유형별로 연체율이 다를 수 있어 중요한 범주형 변수로 작용 가능.  
 
-결측 치 비율 상위 10개:
-열 이름	결측치 개수	결측치 비율 (%)
-COMMONAREA_MEDI	214865	69.872297
-COMMONAREA_MODE	214865	69.872297
-COMMONAREA_AVG	214865	69.872297
-NONLIVINGAPARTMENTS_MODE	213514	69.432963
-NONLIVINGAPARTMENTS_MEDI	213514	69.432963
-NONLIVINGAPARTMENTS_AVG	213514	69.432963
-FONDKAPREMONT_MODE	210295	68.386172
-LIVINGAPARTMENTS_AVG	210199	68.354953
-LIVINGAPARTMENTS_MEDI	210199	68.354953
-LIVINGAPARTMENTS_MODE	210199	68.354953
+#### Loan Amount by Income Type and Loan Repayment Status  
+![image](https://github.com/user-attachments/assets/25acba2c-64f8-4b76-a150-db2216649e5a)
 
-Distribution of TARGET Variable	
- 
-TARGET=0이 대다수이며, TARGET=1은 약 8% 수준으로 연체자의 수가 매우 적다.
-이는 심각한 클래스 불균형 문제로, 향후 모델 학습 시 Stratify나 Undersampling을 고려해야함.
+#### Correlation with TARGET - Top 10 Features  
+![image](https://github.com/user-attachments/assets/4d656aa0-d65c-4101-98cb-6c6f9a3d9ec9)
+EXT_SOURCE_1, EXT_SOURCE_2, EXT_SOURCE_3와 TARGET 사이에 가장 강한 음의 상관관계 확인됨.  
+이 변수들은 외부 신용 점수이며, 높을수록 연체 가능성이 낮음.  
 
-Distribution of Loan Amount (AMT_CREDIT)
- 
-대부분의 대출 금액이 30만 ~ 1000만 단위에 몰려 있음.
-positive skewed 있음 → 로그 변환 등 정규화 필요해보임.
+#### Loan Default Rate by Age Group  
+![image](https://github.com/user-attachments/assets/8523e223-03ec-43ea-a4f0-3648b456db1e)
+젊은 층(20~30대)의 연체율이 상대적으로 높고, 고령층일수록 연체율이 낮음.  
+고령층일수록 안정된 금융 상태  
 
-Distribution of Contract Type
- 
-Cash loans가 대부분을 차지하며, Revolving loans는 비교적 적음.
-계약 유형별로 연체율이 다를 수 있어 중요한 범주형 변수로 작용 가능.
+### bureau.csv- 외부 신용 정보(과거 대출 이력)  
+데이터 개요:  
+- 행(Row) 수: 17  
+- 열(Column) 수: 1716428  
+Column 데이터 타입별 개수:  
+float64:   8  
+int64:     6  
+object:    3  
 
-Loan Amount by Income Type and Loan Repayment Status
- 
-소득 유형	연체자 대출 규모 경향	리스크 
-Businessman	연체 없음	매우 안정
-Working	연체자 약간 낮음	보통
-Commercial associate	연체자 낮음	보통
-State servant	유사	안정
-Pensioner	유사	안정
-Maternity leave	연체자가 더 높음	위험
-Unemployed	연체자 낮음	주의 필요
-Student	연체 없음	매우 안정
+#### Distribution of Credit Active Status  
+![image](https://github.com/user-attachments/assets/65cb4580-b9cc-4d3b-a6b4-1b25f223a20f)
+Closed가 압도적으로 많고, 그 다음이 Active 상태  
+이는 대부분의 대출 계좌가 이미 종료되었고, 일부만 현재 활동 중이라는 것을 보임  
+Bad debt와 Sold는 상대적으로 매우 드물게 나타나며, 분석 시 다르게 취급하거나 그룹화가 필요  
 
-Correlation with TARGET - Top 10 Features
- 
-EXT_SOURCE_1, EXT_SOURCE_2, EXT_SOURCE_3와 TARGET 사이에 가장 강한 음의 상관관계 확인됨.
-이 변수들은 외부 신용 점수이며, 높을수록 연체 가능성이 낮음.
+#### Distribution of Credit Type  
+![image](https://github.com/user-attachments/assets/28d66857-171d-4b2d-9062-fffa3d279ed2)
+가장 많은 대출 유형은 Consumer credit, 그 다음은 Credit card입니다.  
+Mortgage, Car loan 등은 일부 존재하지만 편중 현상이 크기 때문에 향후 분석 시 상위 몇 개만 유지하거나 범주 통합이 필요  
+나머지 희귀 대출 유형들은 카테고리 수 감소 또는 기타로 통합하는 방식으로 처리 가능성 고려.  
 
-Loan Default Rate by Age Group
- 
-젊은 층(20~30대)의 연체율이 상대적으로 높고, 고령층일수록 연체율이 낮음.
-고령층일수록 안정된 금융 상태
+#### Distribution of DAYS_CREDIT  
+![image](https://github.com/user-attachments/assets/9a6cc506-23a5-4dd7-8103-e5500b1e5381)
+값이 0에 가까울수록 최근 조회된 계좌, 음의 값일수록 오래된 계좌를 의미.  
+대부분의 계좌는 최근 몇 년 이내에 조회되었으며, 멀리 과거로 갈수록 빈도가 줌  
+이는 최신 신용 정보에 대한 가중치를 줄 때 유용하게 사용 가능.  
 
-bureau.csv- 외부 신용 정보(과거 대출 이력)
-데이터 개요:
-- 행(Row) 수: 17
-- 열(Column) 수: 1716428
-Column 데이터 타입별 개수:
-float64:   8
-int64:     6
-object:    3
-수치형 변수 통계 요약:
-변수명	count	mean	std	min
-SK_ID_CURR	1716428.0	278214.9	102938.6	100001.0
-SK_ID_BUREAU	1716428.0	5924434.0	532265.7	5000000.0
-DAYS_CREDIT	1716428.0	-1142.1	795.2	-2922.0
-CREDIT_DAY_OVERDUE	1716428.0	0.82	36.54	0.0
-DAYS_CREDIT_ENDDATE	1610875.0	510.5	4994.2	-42060.0
-DAYS_ENDDATE_FACT	1082775.0	-1017.4	714.0	-42023.0
-AMT_CREDIT_MAX_OVERDUE	591940.0	3825.4	206031.6	0.0
-CNT_CREDIT_PROLONG	1716428.0	0.0064	0.0962	0.0
-AMT_CREDIT_SUM	1716415.0	354994.6	1149811.0	0.0
-AMT_CREDIT_SUM_DEBT	1458759.0	137085.1	677401.1	-4705600.3
-AMT_CREDIT_SUM_LIMIT	1124648.0	6229.5	45032.0	-586406.1
-AMT_CREDIT_SUM_OVERDUE	1716428.0	37.91	5937.7	0.0
-DAYS_CREDIT_UPDATE	1716428.0	-593.7	720.7	-41947.0
-AMT_ANNUITY	489637.0	15712.8	325826.9	0.0
+#### Correlation Heatmap of Selected Numerical Features  
+![image](https://github.com/user-attachments/assets/9aeec750-d4d2-4dde-8510-023db5b25014)
+AMT_CREDIT_SUM ↔ AMT_CREDIT_SUM_DEBT 간의 상관계수가 0.68로 가장 높음 → 이는 전체 대출 잔액이 부채 잔액과 밀접히 연관되어 있음을 의미.  
+DAYS_CREDIT ↔ DAYS_CREDIT_UPDATE 간에도 높은 양의 상관관계 (0.69) → 조회 시점과 업데이트 시점 간 간격이 적은 경우가 많음.  
+나머지 변수들은 대부분 상관관계가 낮음.  
 
-변수	25%	50%	75%	최대값
-SK_ID_CURR	188866.75	278055.0	367426.00	456255.0
-SK_ID_BUREAU	5463953.75	5926303.5	6385681.25	6843457.0
-DAYS_CREDIT	-1666.00	-987.0	-474.00	0.0
-CREDIT_DAY_OVERDUE	0.00	0.0	0.00	2792.0
-DAYS_CREDIT_ENDDATE	-1138.00	-330.0	474.00	31199.0
-DAYS_ENDDATE_FACT	-1489.00	-897.0	-425.00	0.0
-AMT_CREDIT_MAX_OVERDUE	0.00	0.0	0.00	115987200.0
-CNT_CREDIT_PROLONG	0.00	0.0	0.00	9.0
-AMT_CREDIT_SUM	51300.00	125518.5	315000.00	585000000.0
-AMT_CREDIT_SUM_DEBT	0.00	0.0	40153.50	170100000.0
-AMT_CREDIT_SUM_LIMIT	0.00	0.0	0.00	4705600.0
-AMT_CREDIT_SUM_OVERDUE	0.00	0.0	0.00	3756681.0
-DAYS_CREDIT_UPDATE	-908.00	-395.0	-33.00	372.0
-AMT_ANNUITY	0.00	0.0	13500.00	118453400.0
+### previous_application- - 기존 대출 신청 내역  
+데이터 개요:  
+- 행(Row) 수: 37  
+- 열(Column) 수: 1670214  
+Column 데이터 타입별 개수:  
+float64:   16  
+int64:     15  
+object:    6  
 
-범주형 변수 통계 요약:
-변수명	고유값 수	최빈값
-CREDIT_ACTIVE	4	Closed
-CREDIT_CURRENCY	4	currency 1
-CREDIT_TYPE	15	Consumer credit
-
-결측 치 비율 상위 10개:
-변수명	결측치 수	결측 비율
-AMT_ANNUITY	1226791	71.47%
-AMT_CREDIT_MAX_OVERDUE	1124488	65.51%
-DAYS_ENDDATE_FACT	633653	36.92%
-AMT_CREDIT_SUM_LIMIT	591780	34.48%
-AMT_CREDIT_SUM_DEBT	257669	15.01%
-DAYS_CREDIT_ENDDATE	105553	6.15%
-AMT_CREDIT_SUM	13	0.0008%
-
-Distribution of Credit Active Status
- 
-Closed가 압도적으로 많고, 그 다음이 Active 상태
-이는 대부분의 대출 계좌가 이미 종료되었고, 일부만 현재 활동 중이라는 것을 보임
-Bad debt와 Sold는 상대적으로 매우 드물게 나타나며, 분석 시 다르게 취급하거나 그룹화가 필요
-
-Distribution of Credit Type
- 
-가장 많은 대출 유형은 Consumer credit, 그 다음은 Credit card입니다.
-Mortgage, Car loan 등은 일부 존재하지만 편중 현상이 크기 때문에 향후 분석 시 상위 몇 개만 유지하거나 범주 통합이 필요
-나머지 희귀 대출 유형들은 카테고리 수 감소 또는 기타로 통합하는 방식으로 처리 가능성 고려.
-
-Distribution of DAYS_CREDIT
- 
-값이 0에 가까울수록 최근 조회된 계좌, 음의 값일수록 오래된 계좌를 의미.
-대부분의 계좌는 최근 몇 년 이내에 조회되었으며, 멀리 과거로 갈수록 빈도가 줌
-이는 최신 신용 정보에 대한 가중치를 줄 때 유용하게 사용 가능.
-
-Correlation Heatmap of Selected Numerical Features
- 
-AMT_CREDIT_SUM ↔ AMT_CREDIT_SUM_DEBT 간의 상관계수가 0.68로 가장 높음 → 이는 전체 대출 잔액이 부채 잔액과 밀접히 연관되어 있음을 의미.
-DAYS_CREDIT ↔ DAYS_CREDIT_UPDATE 간에도 높은 양의 상관관계 (0.69) → 조회 시점과 업데이트 시점 간 간격이 적은 경우가 많음.
-나머지 변수들은 대부분 상관관계가 낮음.
-
-previous_application- - 기존 대출 신청 내역
-데이터 개요:
-- 행(Row) 수: 37
-- 열(Column) 수: 1670214
-Column 데이터 타입별 개수:
-float64:   16
-int64:     15
-object:    6
-수치형 변수 통계 요약:
-변수명	count	mean	std
-SK_ID_PREV	1670214.0	1923089.0	532598.0
-SK_ID_CURR	1670214.0	278357.2	102814.8
-AMT_ANNUITY	1297979.0	15955.1	14782.1
-AMT_APPLICATION	1670214.0	175233.9	292779.8
-AMT_CREDIT	1670213.0	196114.0	318574.6
-AMT_DOWN_PAYMENT	774370.0	6697.4	20921.5
-AMT_GOODS_PRICE	1284699.0	227847.3	315396.6
-HOUR_APPR_PROCESS_START	1670214.0	12.48	3.33
-NFLAG_LAST_APPL_IN_DAY	1670214.0	0.9965	0.0593
-RATE_DOWN_PAYMENT	774370.0	0.0796	0.1078
-RATE_INTEREST_PRIMARY	5951.0	0.1884	0.0877
-RATE_INTEREST_PRIVILEGED	5951.0	0.7735	0.1009
-DAYS_DECISION	1670214.0	-880.7	779.1
-SELLERPLACE_AREA	1670214.0	313.95	7127.4
-CNT_PAYMENT	1297984.0	16.05	14.57
-DAYS_FIRST_DRAWING	997149.0	342209.9	88916.1
-DAYS_FIRST_DUE	997149.0	13826.3	72444.9
-DAYS_LAST_DUE_1ST_VERSION	997149.0	33767.8	106857.0
-DAYS_LAST_DUE	997149.0	76582.4	149647.4
-DAYS_TERMINATION	997149.0	81992.3	153303.5
-NFLAG_INSURED_ON_APPROVAL	997149.0	0.3326	0.4711
-
-변수명	min	25%	50%	75%	max
-SK_ID_PREV	1000001	1461857	1923110	2384280	2845382
-SK_ID_CURR	100001	189329	278714.5	367514	456255
-AMT_ANNUITY	0	6321.78	11250	20658.42	418058.15
-AMT_APPLICATION	0	18720	71046	180360	6905160
-AMT_CREDIT	0	24160.5	80541	216418.5	6905160
-AMT_DOWN_PAYMENT	-0.9	0	1638	7740	3060045
-AMT_GOODS_PRICE	0	50841	112320	234000	6905160
-HOUR_APPR_PROCESS_START	0	10	12	15	23
-NFLAG_LAST_APPL_IN_DAY	0	1	1	1	1
-RATE_DOWN_PAYMENT	-0.000015	0	0.0516	0.1089	1
-RATE_INTEREST_PRIMARY	0.0348	0.1607	0.1891	0.1933	1
-RATE_INTEREST_PRIVILEGED	0.3731	0.7156	0.8351	0.8525	1
-DAYS_DECISION	-2922	-1300	-581	-280	-1
-SELLERPLACE_AREA	-1	-1	3	82	4000000
-CNT_PAYMENT	0	6	12	24	84
-DAYS_FIRST_DRAWING	-2922	365243	365243	365243	365243
-DAYS_FIRST_DUE	-2892	-1628	-831	-411	365243
-DAYS_LAST_DUE_1ST_VERSION	-2801	-1242	-361	129	365243
-DAYS_LAST_DUE	-2889	-1314	-537	-74	365243
-DAYS_TERMINATION	-2874	-1270	-499	-44	365243
-NFLAG_INSURED_ON_APPROVAL	0	0	0	1	1
-
-범주형 변수 통계 요약:
-변수명	고유값 수	최빈값
-NAME_CONTRACT_TYPE	4	Cash loans
-WEEKDAY_APPR_PROCESS_START	7	TUESDAY
-FLAG_LAST_APPL_PER_CONTRACT	2	Y
-NAME_CASH_LOAN_PURPOSE	25	XAP
-NAME_CONTRACT_STATUS	4	Approved
-NAME_PAYMENT_TYPE	4	Cash through the bank
-CODE_REJECT_REASON	9	XAP
-NAME_TYPE_SUITE	7	Unaccompanied
-NAME_CLIENT_TYPE	4	Repeater
-NAME_GOODS_CATEGORY	28	XNA
-NAME_PORTFOLIO	5	POS
-NAME_PRODUCT_TYPE	3	XNA
-CHANNEL_TYPE	8	Credit and cash offices
-NAME_SELLER_INDUSTRY	11	XNA
-NAME_YIELD_GROUP	5	XNA
-PRODUCT_COMBINATION	17	Cash
-
-결측 치 비율 상위 10개:
-변수명	결측치 수	결측 비율
-RATE_INTEREST_PRIVILEGED	1,664,263	99.64%
-RATE_INTEREST_PRIMARY	1,664,263	99.64%
-AMT_DOWN_PAYMENT	895,844	53.64%
-RATE_DOWN_PAYMENT	895,844	53.64%
-NAME_TYPE_SUITE	820,405	49.12%
-DAYS_LAST_DUE	673,065	40.30%
-DAYS_FIRST_DRAWING	673,065	40.30%
-DAYS_FIRST_DUE	673,065	40.30%
-DAYS_TERMINATION	673,065	40.30%
-NFLAG_INSURED_ON_APPROVAL	673,065	40.30%
-
-Distribution of Previous Application Status
+#### Distribution of Previous Application Status
  
 대부분의 과거 신청은 Approved 상태로 처리
 Canceled와 Refused 꽤 있음.
