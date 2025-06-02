@@ -7,13 +7,13 @@ ________________________________________
 ________________________________________
 ## Data Inspection  
 ### application_train.csv - 고객 정보 기반으로 대출 연체 여부(TARGET) 예측  
-데이터 개요:  
-- 행(Row) 수: 122
-- 열(Column) 수: 307511  
-Column 데이터 타입별 개수:  
-float64:   65  
-int64:     41  
-object:    16  
+- 데이터 개요:  
+ - 행(Row) 수: 122
+ - 열(Column) 수: 307511  
+- Column 데이터 타입별 개수:  
+ - float64:   65  
+ - int64:     41  
+ - object:    16  
 
 #### Distribution of TARGET Variable  
 ![image](https://github.com/user-attachments/assets/b7ff1500-5eb2-480c-a981-c3cb92cea665)
@@ -44,13 +44,13 @@ EXT_SOURCE_1, EXT_SOURCE_2, EXT_SOURCE_3와 TARGET 사이에 가장 강한 음�
 고령층일수록 안정된 금융 상태  
 
 ### bureau.csv- 외부 신용 정보(과거 대출 이력)  
-데이터 개요:  
-- 행(Row) 수: 17  
-- 열(Column) 수: 1716428  
-Column 데이터 타입별 개수:  
-float64:   8  
-int64:     6  
-object:    3  
+- 데이터 개요:  
+ - 행(Row) 수: 17  
+ - 열(Column) 수: 1716428  
+- Column 데이터 타입별 개수:  
+ - float64:   8  
+ - int64:     6  
+ - object:    3  
 
 #### Distribution of Credit Active Status  
 ![image](https://github.com/user-attachments/assets/65cb4580-b9cc-4d3b-a6b4-1b25f223a20f)
@@ -77,44 +77,45 @@ DAYS_CREDIT ↔ DAYS_CREDIT_UPDATE 간에도 높은 양의 상관관계 (0.69) �
 나머지 변수들은 대부분 상관관계가 낮음.  
 
 ### previous_application- - 기존 대출 신청 내역  
-데이터 개요:  
-- 행(Row) 수: 37  
-- 열(Column) 수: 1670214  
-Column 데이터 타입별 개수:  
-float64:   16  
-int64:     15  
-object:    6  
+- 데이터 개요:  
+ - 행(Row) 수: 37  
+ - 열(Column) 수: 1670214  
+- Column 데이터 타입별 개수:  
+ - float64:   16
+ - int64:     15  
+ - object:    6  
 
-#### Distribution of Previous Application Status
- 
-대부분의 과거 신청은 Approved 상태로 처리
-Canceled와 Refused 꽤 있음.
-고객이 이전에 승인된 대출 경험이 있는지, 반복적으로 거절되었는지에 따라 신용 리스크를 예측 가능
+#### Distribution of Previous Application Status  
+![image](https://github.com/user-attachments/assets/6e4286d1-11f2-4961-8dab-14a4a97a30d2)
+대부분의 과거 신청은 Approved 상태로 처리  
+Canceled와 Refused 꽤 있음.  
+고객이 이전에 승인된 대출 경험이 있는지, 반복적으로 거절되었는지에 따라 신용 리스크를 예측 가능  
 
-Distribution of Previous Contract Type
- 
-주로 Cash loans와 Consumer loans가 많고, Revolving loans도 일부 존재
-고객이 어떤 유형의 대출을 선호했는지 파악할 수 있으며, 이후 대출 유형 추천에 반영 가능
+#### Distribution of Previous Contract Type  
+![image](https://github.com/user-attachments/assets/d0634a40-53a4-496d-b92a-ad74bf847fb6)
+주로 Cash loans와 Consumer loans가 많고, Revolving loans도 일부 존재  
+고객이 어떤 유형의 대출을 선호했는지 파악할 수 있으며, 이후 대출 유형 추천에 반영 가능  
 
-Mean Application vs Credit Amount by Contract Type
- 
-모든 계약 유형에서 승인된 금액(AMT_CREDIT)이 신청 금액(AMT_APPLICATION)보다 대부분 크거나 비슷함.
-특히 Revolving loans에서는 평균 승인 금액이 신청 금액보다 높음
+#### Mean Application vs Credit Amount by Contract Type  
+![image](https://github.com/user-attachments/assets/6e94cc90-704a-4916-ae42-4e14d11df9fc)
+모든 계약 유형에서 승인된 금액(AMT_CREDIT)이 신청 금액(AMT_APPLICATION)보다 대부분 크거나 비슷함.  
+특히 Revolving loans에서는 평균 승인 금액이 신청 금액보다 높음  
 
-Application Status by Loan Type
- 
-Consumer loans는 승인률이 높고 거절 및 취소도 일부 있음.
-Cash loans는 승인 외에도 취소율이 꽤 높음.
-Revolving loans는 승인, 거절, 취소가 균형 있게 분포됨.
-대출 상품별로 승인률 차이가 존재하므로 신용 점수 모델에 loan type을 반영할 수 있음.
+#### Application Status by Loan Type  
+![image](https://github.com/user-attachments/assets/bc24b6aa-92df-4a7b-86ca-e2b06bdf891b)
+Consumer loans는 승인률이 높고 거절 및 취소도 일부 있음.  
+Cash loans는 승인 외에도 취소율이 꽤 높음.  
+Revolving loans는 승인, 거절, 취소가 균형 있게 분포됨.  
+대출 상품별로 승인률 차이가 존재하므로 신용 점수 모델에 loan type을 반영할 수 있음.  
 
-Distribution of Days Since Previous Application
-최근 신청이 많고, 시간이 오래된 과거 신청은 점차 줌.
+#### Distribution of Days Since Previous Application  
+![image](https://github.com/user-attachments/assets/dbdebb14-32f4-47f9-b44b-bda541d1aba5)
+최근 신청이 많고, 시간이 오래된 과거 신청은 점차 줌.  
 
-Correlation Heatmap of Numerical Features
- 
-AMT_APPLICATION, AMT_CREDIT, AMT_GOODS_PRICE는 서로 강한 양의 상관관계 
-DAYS_LAST_DUE와 DAYS_TERMINATION도 0.93의 높은 상관관계를 보임.
+#### Correlation Heatmap of Numerical Features  
+![image](https://github.com/user-attachments/assets/83480f51-29bc-4478-b821-54bd158a060b)
+AMT_APPLICATION, AMT_CREDIT, AMT_GOODS_PRICE는 서로 강한 양의 상관관계  
+DAYS_LAST_DUE와 DAYS_TERMINATION도 0.93의 높은 상관관계를 보임.  
 
 
 
